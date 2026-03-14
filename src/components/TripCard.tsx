@@ -1,7 +1,6 @@
 import { Voyage } from "@/types";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { formatPrice } from "@/lib/formatters";
 import VoyageStatusBadge from "./VoyageStatusBadge";
 
 interface TripCardProps {
@@ -72,10 +71,36 @@ const TripCard = ({ voyage, index = 0 }: TripCardProps) => {
               </div>
             )}
 
+            {/* Section Tarifs */}
+            <div className="mb-4 pb-4 border-b border-gray-200">
+              <p className="text-xs font-semibold text-muted-foreground mb-2">Tarifs</p>
+              <div className="space-y-1.5">
+                {voyage.priceAdult && voyage.priceAdult > 0 ? (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Adulte :</span>
+                    <span className="text-sm font-semibold" style={{ color: "#D4AF37" }}>
+                      {voyage.priceAdult.toLocaleString("fr-FR")} DA
+                    </span>
+                  </div>
+                ) : null}
+                {voyage.priceChild && voyage.priceChild > 0 ? (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Enfant :</span>
+                    <span className="text-sm font-semibold text-accent">
+                      {voyage.priceChild.toLocaleString("fr-FR")} DA
+                    </span>
+                  </div>
+                ) : null}
+                {(!voyage.priceAdult || voyage.priceAdult === 0) && (!voyage.priceChild || voyage.priceChild === 0) ? (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Prix :</span>
+                    <span className="text-sm font-semibold text-accent">Sur devis</span>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+
             <div className="flex items-center justify-between">
-              <span className="text-accent font-semibold tabular-nums">
-                à partir de {formatPrice(voyage.price)}
-              </span>
               {voyage.category === "Voyage à la Carte" ? (
                 <span className="text-xs bg-accent/10 text-accent px-2 py-1 rounded-md font-medium">
                   Sur mesure

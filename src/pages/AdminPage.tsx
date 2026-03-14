@@ -486,7 +486,7 @@ const VoyagesView = ({
   setShowAddForm: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const [newVoyage, setNewVoyage] = useState({
-    title: "", imageUrl: "", imageUrls: [] as string[], price: "", description: "", category: "Omrah" as VoyageCategory, duration: "", date: "", status: "normal" as VoyageStatus,
+    title: "", imageUrl: "", imageUrls: [] as string[], price: "", priceAdult: "", priceChild: "", description: "", category: "Omrah" as VoyageCategory, duration: "", date: "", status: "normal" as VoyageStatus, flightType: "", visaRequired: "", roomType: "", mealPlan: "",
   });
   const [newStartDate, setNewStartDate] = useState<Date | undefined>();
   const [newEndDate, setNewEndDate] = useState<Date | undefined>();
@@ -498,7 +498,7 @@ const VoyagesView = ({
   
   const [editingVoyage, setEditingVoyage] = useState<Voyage | null>(null);
   const [editForm, setEditForm] = useState({
-    title: "", imageUrl: "", imageUrls: [] as string[], price: "", description: "", category: "Omrah" as VoyageCategory, duration: "", date: "", status: "normal" as VoyageStatus,
+    title: "", imageUrl: "", imageUrls: [] as string[], price: "", priceAdult: "", priceChild: "", description: "", category: "Omrah" as VoyageCategory, duration: "", date: "", status: "normal" as VoyageStatus, flightType: "", visaRequired: "", roomType: "", mealPlan: "",
   });
   const [editStartDate, setEditStartDate] = useState<Date | undefined>();
   const [editEndDate, setEditEndDate] = useState<Date | undefined>();
@@ -562,7 +562,7 @@ const VoyagesView = ({
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newVoyage.title || !newVoyage.price) return;
+    if (!newVoyage.title || !newVoyage.priceAdult || !newVoyage.priceChild) return;
     
     // Pour "Voyage à la Carte", utiliser des valeurs par défaut
     let duration, date;
@@ -591,7 +591,9 @@ const VoyagesView = ({
         title: newVoyage.title,
         imageUrl: newVoyage.imageUrls[0] || newVoyage.imageUrl || "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&q=80",
         imageUrls: newVoyage.imageUrls.length > 0 ? newVoyage.imageUrls : undefined,
-        price: Number(newVoyage.price),
+        price: Number(newVoyage.priceAdult),
+        priceAdult: Number(newVoyage.priceAdult),
+        priceChild: Number(newVoyage.priceChild),
         description: newVoyage.description,
         category: newVoyage.category,
         duration: duration || newVoyage.duration,
@@ -599,10 +601,14 @@ const VoyagesView = ({
         createdAt: new Date().toISOString(),
         stages: needsStages(newVoyage.category) ? newStages : undefined,
         status: newVoyage.status,
+        flightType: newVoyage.flightType || undefined,
+        visaRequired: newVoyage.visaRequired || undefined,
+        roomType: newVoyage.roomType || undefined,
+        mealPlan: newVoyage.mealPlan || undefined,
       };
       addVoyage(v);
       setShowAddForm(false);
-      setNewVoyage({ title: "", imageUrl: "", imageUrls: [], price: "", description: "", category: "Omrah", duration: "", date: "", status: "normal" });
+      setNewVoyage({ title: "", imageUrl: "", imageUrls: [], price: "", priceAdult: "", priceChild: "", description: "", category: "Omrah", duration: "", date: "", status: "normal", flightType: "", visaRequired: "", roomType: "", mealPlan: "" });
       setNewStartDate(undefined);
       setNewEndDate(undefined);
       setNewStages([
@@ -626,11 +632,17 @@ const VoyagesView = ({
       imageUrl: voyage.imageUrl,
       imageUrls: voyage.imageUrls || [],
       price: String(voyage.price),
+      priceAdult: String(voyage.priceAdult || voyage.price),
+      priceChild: String(voyage.priceChild || 0),
       description: voyage.description || "",
       category: voyage.category,
       duration: voyage.duration || "",
       date: voyage.date || "",
       status: voyage.status || "normal",
+      flightType: voyage.flightType || "",
+      visaRequired: voyage.visaRequired || "",
+      roomType: voyage.roomType || "",
+      mealPlan: voyage.mealPlan || "",
     });
     
     // Parser et charger les dates existantes si disponibles
@@ -670,7 +682,7 @@ const VoyagesView = ({
 
   const handleEdit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editForm.title || !editForm.price || !editingVoyage) return;
+    if (!editForm.title || !editForm.priceAdult || !editForm.priceChild || !editingVoyage) return;
     
     // Pour "Voyage à la Carte", utiliser des valeurs par défaut
     let duration, date;
@@ -705,13 +717,19 @@ const VoyagesView = ({
         title: editForm.title,
         imageUrl: editForm.imageUrls[0] || editForm.imageUrl || editingVoyage.imageUrl,
         imageUrls: editForm.imageUrls.length > 0 ? editForm.imageUrls : undefined,
-        price: Number(editForm.price),
+        price: Number(editForm.priceAdult),
+        priceAdult: Number(editForm.priceAdult),
+        priceChild: Number(editForm.priceChild),
         description: editForm.description,
         category: editForm.category,
         duration: duration || editForm.duration,
         date: date || editForm.date,
         stages: needsStages(editForm.category) ? editStages : undefined,
         status: editForm.status,
+        flightType: editForm.flightType || undefined,
+        visaRequired: editForm.visaRequired || undefined,
+        roomType: editForm.roomType || undefined,
+        mealPlan: editForm.mealPlan || undefined,
       });
       setEditingVoyage(null);
       setEditStartDate(undefined);
@@ -759,12 +777,12 @@ const VoyagesView = ({
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1.5">Prix (DA) *</label>
+                <label className="block text-sm font-medium mb-1.5">Prix Adulte (DA) *</label>
                 <div className="relative">
                   <input 
                     type="number" 
-                    value={newVoyage.price} 
-                    onChange={(e) => setNewVoyage({ ...newVoyage, price: e.target.value })} 
+                    value={newVoyage.priceAdult} 
+                    onChange={(e) => setNewVoyage({ ...newVoyage, priceAdult: e.target.value })} 
                     className="form-input pr-12" 
                     required 
                     min={0}
@@ -775,15 +793,83 @@ const VoyagesView = ({
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1.5">Statut du voyage</label>
-                <select value={newVoyage.status} onChange={(e) => setNewVoyage({ ...newVoyage, status: e.target.value as VoyageStatus })} className="form-input">
-                  <option value="normal">Normal</option>
-                  <option value="almost-full">Bientôt complet (باقي أماكن قليلة)</option>
-                  <option value="full">Complet (الرحلة كاملة)</option>
-                  <option value="limited-offer">Offre limitée (عرض محدود)</option>
-                </select>
+                <label className="block text-sm font-medium mb-1.5">Prix Enfant (DA) *</label>
+                <div className="relative">
+                  <input 
+                    type="number" 
+                    value={newVoyage.priceChild} 
+                    onChange={(e) => setNewVoyage({ ...newVoyage, priceChild: e.target.value })} 
+                    className="form-input pr-12" 
+                    required 
+                    min={0}
+                    step="0.01"
+                    placeholder="0"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium">DA</span>
+                </div>
               </div>
             </div>
+            <div>
+              <label className="block text-sm font-medium mb-1.5">Statut du voyage</label>
+              <select value={newVoyage.status} onChange={(e) => setNewVoyage({ ...newVoyage, status: e.target.value as VoyageStatus })} className="form-input">
+                <option value="normal">Normal</option>
+                <option value="almost-full">Bientôt complet (باقي أماكن قليلة)</option>
+                <option value="full">Complet (الرحلة كاملة)</option>
+                <option value="limited-offer">Offre limitée (عرض محدود)</option>
+              </select>
+            </div>
+
+            {/* Champs de contrôle pour Omrah et Voyage Organisé */}
+            {(newVoyage.category === "Omrah" || newVoyage.category === "Voyage Organisé") && (
+              <div className="space-y-4 pt-2">
+                <div className="flex items-center gap-2 pt-2">
+                  <div className="h-px flex-1 bg-accent/20" />
+                  <h3 className="text-sm font-semibold text-primary">Options Fixes (Contrôle Client)</h3>
+                  <div className="h-px flex-1 bg-accent/20" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1.5">Type de Vol</label>
+                    <select value={newVoyage.flightType} onChange={(e) => setNewVoyage({ ...newVoyage, flightType: e.target.value })} className="form-input">
+                      <option value="">Laisser le client choisir</option>
+                      <option value="Avec vol">Avec vol</option>
+                      <option value="Sans vol">Sans vol</option>
+                    </select>
+                    <p className="text-xs text-muted-foreground mt-1">Laissez vide pour que le client choisisse</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1.5">Besoin d'un VISA</label>
+                    <select value={newVoyage.visaRequired} onChange={(e) => setNewVoyage({ ...newVoyage, visaRequired: e.target.value })} className="form-input">
+                      <option value="">Laisser le client choisir</option>
+                      <option value="Oui">Oui</option>
+                      <option value="Non">Non</option>
+                    </select>
+                    <p className="text-xs text-muted-foreground mt-1">Laissez vide pour que le client choisisse</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1.5">Type de Chambre</label>
+                    <select value={newVoyage.roomType} onChange={(e) => setNewVoyage({ ...newVoyage, roomType: e.target.value })} className="form-input">
+                      <option value="">Laisser le client choisir</option>
+                      <option value="Double">Double</option>
+                      <option value="Triple">Triple</option>
+                      <option value="Quadruple">Quadruple</option>
+                    </select>
+                    <p className="text-xs text-muted-foreground mt-1">Laissez vide pour que le client choisisse</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1.5">Pension</label>
+                    <select value={newVoyage.mealPlan} onChange={(e) => setNewVoyage({ ...newVoyage, mealPlan: e.target.value })} className="form-input">
+                      <option value="">Laisser le client choisir</option>
+                      <option value="Pension complète">Pension complète</option>
+                      <option value="Demi-pension">Demi-pension</option>
+                      <option value="Petit-déjeuner seul">Petit-déjeuner seul</option>
+                    </select>
+                    <p className="text-xs text-muted-foreground mt-1">Laissez vide pour que le client choisisse</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div>
               <label className="block text-sm font-medium mb-1.5">
                 Dates du voyage {newVoyage.category !== "Voyage à la Carte" && "*"}
@@ -904,12 +990,12 @@ const VoyagesView = ({
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1.5">Prix (DA) *</label>
+                    <label className="block text-sm font-medium mb-1.5">Prix Adulte (DA) *</label>
                     <div className="relative">
                       <input 
                         type="number" 
-                        value={editForm.price} 
-                        onChange={(e) => setEditForm({ ...editForm, price: e.target.value })} 
+                        value={editForm.priceAdult} 
+                        onChange={(e) => setEditForm({ ...editForm, priceAdult: e.target.value })} 
                         className="form-input pr-12" 
                         required 
                         min={0}
@@ -920,15 +1006,82 @@ const VoyagesView = ({
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1.5">Statut du voyage</label>
-                    <select value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value as VoyageStatus })} className="form-input">
-                      <option value="normal">Normal</option>
-                      <option value="almost-full">Bientôt complet (باقي أماكن قليلة)</option>
-                      <option value="full">Complet (الرحلة كاملة)</option>
-                      <option value="limited-offer">Offre limitée (عرض محدود)</option>
-                    </select>
+                    <label className="block text-sm font-medium mb-1.5">Prix Enfant (DA) *</label>
+                    <div className="relative">
+                      <input 
+                        type="number" 
+                        value={editForm.priceChild} 
+                        onChange={(e) => setEditForm({ ...editForm, priceChild: e.target.value })} 
+                        className="form-input pr-12" 
+                        required 
+                        min={0}
+                        step="0.01"
+                        placeholder="0"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium">DA</span>
+                    </div>
                   </div>
                 </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1.5">Statut du voyage</label>
+                  <select value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value as VoyageStatus })} className="form-input">
+                    <option value="normal">Normal</option>
+                    <option value="almost-full">Bientôt complet (باقي أماكن قليلة)</option>
+                    <option value="full">Complet (الرحلة كاملة)</option>
+                    <option value="limited-offer">Offre limitée (عرض محدود)</option>
+                  </select>
+                </div>
+
+                {/* Champs de contrôle pour Omrah et Voyage Organisé */}
+                {(editForm.category === "Omrah" || editForm.category === "Voyage Organisé") && (
+                  <div className="space-y-4 pt-2">
+                    <div className="flex items-center gap-2 pt-2">
+                      <div className="h-px flex-1 bg-accent/20" />
+                      <h3 className="text-sm font-semibold text-primary">Options Fixes (Contrôle Client)</h3>
+                      <div className="h-px flex-1 bg-accent/20" />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-1.5">Type de Vol</label>
+                        <select value={editForm.flightType} onChange={(e) => setEditForm({ ...editForm, flightType: e.target.value })} className="form-input">
+                          <option value="">Laisser le client choisir</option>
+                          <option value="Avec vol">Avec vol</option>
+                          <option value="Sans vol">Sans vol</option>
+                        </select>
+                        <p className="text-xs text-muted-foreground mt-1">Laissez vide pour que le client choisisse</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1.5">Besoin d'un VISA</label>
+                        <select value={editForm.visaRequired} onChange={(e) => setEditForm({ ...editForm, visaRequired: e.target.value })} className="form-input">
+                          <option value="">Laisser le client choisir</option>
+                          <option value="Oui">Oui</option>
+                          <option value="Non">Non</option>
+                        </select>
+                        <p className="text-xs text-muted-foreground mt-1">Laissez vide pour que le client choisisse</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1.5">Type de Chambre</label>
+                        <select value={editForm.roomType} onChange={(e) => setEditForm({ ...editForm, roomType: e.target.value })} className="form-input">
+                          <option value="">Laisser le client choisir</option>
+                          <option value="Double">Double</option>
+                          <option value="Triple">Triple</option>
+                          <option value="Quadruple">Quadruple</option>
+                        </select>
+                        <p className="text-xs text-muted-foreground mt-1">Laissez vide pour que le client choisisse</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1.5">Pension</label>
+                        <select value={editForm.mealPlan} onChange={(e) => setEditForm({ ...editForm, mealPlan: e.target.value })} className="form-input">
+                          <option value="">Laisser le client choisir</option>
+                          <option value="Pension complète">Pension complète</option>
+                          <option value="Demi-pension">Demi-pension</option>
+                          <option value="Petit-déjeuner seul">Petit-déjeuner seul</option>
+                        </select>
+                        <p className="text-xs text-muted-foreground mt-1">Laissez vide pour que le client choisisse</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div>
                   <label className="block text-sm font-medium mb-1.5">
                     Dates du voyage {editForm.category !== "Voyage à la Carte" && "*"}

@@ -16,6 +16,8 @@ export interface Voyage {
   imageUrl: string;
   imageUrls?: string[];
   price: number;
+  priceAdult?: number;
+  priceChild?: number;
   description: string;
   category: VoyageCategory;
   duration: string;
@@ -23,6 +25,11 @@ export interface Voyage {
   createdAt: string;
   stages?: Stage[];
   status?: VoyageStatus;
+  // Champs de contrôle Admin pour Omrah et Voyage Organisé
+  flightType?: string; // Type de vol (ex: "Avec vol", "Sans vol", "")
+  visaRequired?: string; // Besoin VISA (ex: "Oui", "Non", "")
+  roomType?: string; // Type de chambre (ex: "Double", "Triple", "")
+  mealPlan?: string; // Pension (ex: "Pension complète", "Demi-pension", "")
 }
 
 export type MessageType = 'Billetterie' | 'Devis';

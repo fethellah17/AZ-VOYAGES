@@ -31,13 +31,13 @@ const DevisForm = ({ prefilledDestination = "", showLayout = false, voyageData }
     telephone: "",
     destination: voyageData?.title || prefilledDestination,
     category: voyageData?.category || "",
-    besoinVisa: "",
-    volAvecSans: "",
+    besoinVisa: voyageData?.visaRequired || "",
+    volAvecSans: voyageData?.flightType || "",
     nomHotel: getHotelNames(),
     nombreEtoiles: "",
     nombreChambres: "",
-    typeChambre: "",
-    pension: "",
+    typeChambre: voyageData?.roomType || "",
+    pension: voyageData?.mealPlan || "",
     nombreAdultes: "",
     nombreEnfants: "",
     ageEnfants: "",
@@ -110,13 +110,13 @@ const DevisForm = ({ prefilledDestination = "", showLayout = false, voyageData }
           telephone: "",
           destination: voyageData?.title || prefilledDestination,
           category: voyageData?.category || "",
-          besoinVisa: "",
-          volAvecSans: "",
+          besoinVisa: voyageData?.visaRequired || "",
+          volAvecSans: voyageData?.flightType || "",
           nomHotel: getHotelNames(),
           nombreEtoiles: "",
           nombreChambres: "",
-          typeChambre: "",
-          pension: "",
+          typeChambre: voyageData?.roomType || "",
+          pension: voyageData?.mealPlan || "",
           nombreAdultes: "",
           nombreEnfants: "",
           ageEnfants: "",
@@ -228,27 +228,49 @@ const DevisForm = ({ prefilledDestination = "", showLayout = false, voyageData }
                   <option value="Voyage à la Carte">Voyage à la Carte</option>
                 </select>
               </Field>
+              
+              {/* Besoin VISA - Verrouillé ou Modifiable */}
               <Field label="Besoin d'un VISA">
-                <select
-                  value={form.besoinVisa}
-                  onChange={(e) => setForm({ ...form, besoinVisa: e.target.value })}
-                  className="devis-input"
-                >
-                  <option value="">Sélectionner</option>
-                  <option value="Oui">Oui</option>
-                  <option value="Non">Non</option>
-                </select>
+                <div className="relative">
+                  <select
+                    value={voyageData?.visaRequired ? voyageData.visaRequired : form.besoinVisa}
+                    onChange={(e) => setForm({ ...form, besoinVisa: e.target.value })}
+                    className={`devis-input ${voyageData?.visaRequired ? "bg-amber-50 border-amber-200 cursor-not-allowed" : ""}`}
+                    disabled={!!voyageData?.visaRequired}
+                    title={voyageData?.visaRequired ? "Inclus dans le forfait" : ""}
+                  >
+                    {!voyageData?.visaRequired && <option value="">Sélectionner</option>}
+                    <option value="Oui">Oui</option>
+                    <option value="Non">Non</option>
+                  </select>
+                  {voyageData?.visaRequired && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-600 text-sm font-semibold">
+                      🔒
+                    </div>
+                  )}
+                </div>
               </Field>
+              
+              {/* Type de Vol - Verrouillé ou Modifiable */}
               <Field label="Vol">
-                <select
-                  value={form.volAvecSans}
-                  onChange={(e) => setForm({ ...form, volAvecSans: e.target.value })}
-                  className="devis-input"
-                >
-                  <option value="">Sélectionner</option>
-                  <option value="Avec vol">Avec vol</option>
-                  <option value="Sans vol">Sans vol</option>
-                </select>
+                <div className="relative">
+                  <select
+                    value={voyageData?.flightType ? voyageData.flightType : form.volAvecSans}
+                    onChange={(e) => setForm({ ...form, volAvecSans: e.target.value })}
+                    className={`devis-input ${voyageData?.flightType ? "bg-amber-50 border-amber-200 cursor-not-allowed" : ""}`}
+                    disabled={!!voyageData?.flightType}
+                    title={voyageData?.flightType ? "Inclus dans le forfait" : ""}
+                  >
+                    {!voyageData?.flightType && <option value="">Sélectionner</option>}
+                    <option value="Avec vol">Avec vol</option>
+                    <option value="Sans vol">Sans vol</option>
+                  </select>
+                  {voyageData?.flightType && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-600 text-sm font-semibold">
+                      🔒
+                    </div>
+                  )}
+                </div>
               </Field>
             </div>
           </div>
@@ -298,18 +320,29 @@ const DevisForm = ({ prefilledDestination = "", showLayout = false, voyageData }
                   placeholder="1"
                 />
               </Field>
+              
+              {/* Type de chambre - Verrouillé ou Modifiable */}
               <Field label="Type de chambre">
-                <select
-                  value={form.typeChambre}
-                  onChange={(e) => setForm({ ...form, typeChambre: e.target.value })}
-                  className="devis-input"
-                >
-                  <option value="">Sélectionner</option>
-                  <option value="Simple">Simple</option>
-                  <option value="Double">Double</option>
-                  <option value="Triple">Triple</option>
-                  <option value="Quadruple">Quadruple</option>
-                </select>
+                <div className="relative">
+                  <select
+                    value={voyageData?.roomType ? voyageData.roomType : form.typeChambre}
+                    onChange={(e) => setForm({ ...form, typeChambre: e.target.value })}
+                    className={`devis-input ${voyageData?.roomType ? "bg-amber-50 border-amber-200 cursor-not-allowed" : ""}`}
+                    disabled={!!voyageData?.roomType}
+                    title={voyageData?.roomType ? "Inclus dans le forfait" : ""}
+                  >
+                    {!voyageData?.roomType && <option value="">Sélectionner</option>}
+                    <option value="Simple">Simple</option>
+                    <option value="Double">Double</option>
+                    <option value="Triple">Triple</option>
+                    <option value="Quadruple">Quadruple</option>
+                  </select>
+                  {voyageData?.roomType && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-600 text-sm font-semibold">
+                      🔒
+                    </div>
+                  )}
+                </div>
               </Field>
             </div>
           </div>
@@ -320,18 +353,28 @@ const DevisForm = ({ prefilledDestination = "", showLayout = false, voyageData }
               Passagers
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Pension - Verrouillée ou Modifiable */}
               <Field label="Pension">
-                <select
-                  value={form.pension}
-                  onChange={(e) => setForm({ ...form, pension: e.target.value })}
-                  className="devis-input"
-                >
-                  <option value="">Sélectionner</option>
-                  <option value="Petit-déjeuner">Petit-déjeuner</option>
-                  <option value="Demi-pension">Demi-pension</option>
-                  <option value="Pension complète">Pension complète</option>
-                  <option value="All inclusive">All inclusive</option>
-                </select>
+                <div className="relative">
+                  <select
+                    value={voyageData?.mealPlan ? voyageData.mealPlan : form.pension}
+                    onChange={(e) => setForm({ ...form, pension: e.target.value })}
+                    className={`devis-input ${voyageData?.mealPlan ? "bg-amber-50 border-amber-200 cursor-not-allowed" : ""}`}
+                    disabled={!!voyageData?.mealPlan}
+                    title={voyageData?.mealPlan ? "Inclus dans le forfait" : ""}
+                  >
+                    {!voyageData?.mealPlan && <option value="">Sélectionner</option>}
+                    <option value="Petit-déjeuner">Petit-déjeuner</option>
+                    <option value="Demi-pension">Demi-pension</option>
+                    <option value="Pension complète">Pension complète</option>
+                    <option value="All inclusive">All inclusive</option>
+                  </select>
+                  {voyageData?.mealPlan && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-600 text-sm font-semibold">
+                      🔒
+                    </div>
+                  )}
+                </div>
               </Field>
               <Field label="Nombre d'adultes">
                 <input
