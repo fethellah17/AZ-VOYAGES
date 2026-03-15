@@ -1,6 +1,8 @@
 import { useState, useRef } from "react";
 import { Upload, X } from "lucide-react";
 import { toast } from "sonner";
+import { processImageToBase64, isHeicFormat, formatFileSize } from "@/lib/imageProcessor";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 interface ImageUploadProps {
   value: string;
@@ -9,30 +11,17 @@ interface ImageUploadProps {
   required?: boolean;
 }
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ACCEPTED_FORMATS = ["image/jpeg", "image/png"];
+const ACCEPTED_FORMATS = ["image/jpeg", "image/png", "image/heic", "image/heif"];
 
 export const ImageUpload = ({ value, onChange, label = "Image du voyage", required = false }: ImageUploadProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [processingMessage, setProcessingMessage] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const convertToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
-
   const validateFile = (file: File): boolean => {
-    if (!ACCEPTED_FORMATS.includes(file.type)) {
-      toast.error("Format non accepté. Utilisez JPG, JPEG ou PNG.");
-      return false;
-    }
-    if (file.size > MAX_FILE_SIZE) {
-      toast.error("Fichier trop volumineux. Limite : 5MB.");
+    if (!ACCEPTED_FORMATS.includes(file.type) && !isHeicFormat(file)) {
+      toast.error("Format non accepté. Utilisez JPG, JPEG, PNG ou HEIC.");
       return false;
     }
     return true;
@@ -42,15 +31,18 @@ export const ImageUpload = ({ value, onChange, label = "Image du voyage", requir
     if (!validateFile(file)) return;
     
     setIsLoading(true);
+    setProcessingMessage(isHeicFormat(file) ? "Conversion HEIC en cours..." : "Compression de l'image...");
+    
     try {
-      const base64 = await convertToBase64(file);
+      const base64 = await processImageToBase64(file);
       onChange(base64);
-      toast.success("Image uploadée avec succès");
+      toast.success("Image uploadée et optimisée avec succès");
     } catch (error) {
-      toast.error("Erreur lors de l'upload");
+      toast.error(error instanceof Error ? error.message : "Erreur lors du traitement de l'image");
       console.error(error);
     } finally {
       setIsLoading(false);
+      setProcessingMessage("");
     }
   };
 
@@ -122,7 +114,7 @@ export const ImageUpload = ({ value, onChange, label = "Image du voyage", requir
           <input
             ref={fileInputRef}
             type="file"
-            accept=".jpg,.jpeg,.png"
+            accept=".jpg,.jpeg,.png,.heic,.heif"
             onChange={handleFileInput}
             className="absolute inset-0 opacity-0 cursor-pointer"
             disabled={isLoading}
@@ -139,13 +131,13 @@ export const ImageUpload = ({ value, onChange, label = "Image du voyage", requir
               ou glisser-déposer une image
             </p>
             <p className="text-xs text-muted-foreground">
-              JPG, JPEG, PNG • Max 5MB
+              JPG, JPEG, PNG, HEIC • Compression auto
             </p>
           </div>
 
           {isLoading && (
             <div className="absolute inset-0 bg-white/50 rounded-lg flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-2 border-accent border-t-transparent" />
+              <LoadingSpinner size="md" message={processingMessage} />
             </div>
           )}
         </div>

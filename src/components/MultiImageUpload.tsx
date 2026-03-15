@@ -2,6 +2,8 @@ import { useState, useRef } from "react";
 import { Upload, X, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { processImageToBase64, isHeicFormat } from "@/lib/imageProcessor";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 interface MultiImageUploadProps {
   value: string[];
@@ -10,8 +12,7 @@ interface MultiImageUploadProps {
   label?: string;
 }
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ACCEPTED_FORMATS = ["image/jpeg", "image/png"];
+const ACCEPTED_FORMATS = ["image/jpeg", "image/png", "image/heic", "image/heif"];
 
 export const MultiImageUpload = ({
   value,
@@ -21,24 +22,12 @@ export const MultiImageUpload = ({
 }: MultiImageUploadProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [processingMessage, setProcessingMessage] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const convertToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
-
   const validateFile = (file: File): boolean => {
-    if (!ACCEPTED_FORMATS.includes(file.type)) {
-      toast.error("Format non accepté. Utilisez JPG, JPEG ou PNG.");
-      return false;
-    }
-    if (file.size > MAX_FILE_SIZE) {
-      toast.error("Fichier trop volumineux. Limite : 5MB.");
+    if (!ACCEPTED_FORMATS.includes(file.type) && !isHeicFormat(file)) {
+      toast.error("Format non accepté. Utilisez JPG, JPEG, PNG ou HEIC.");
       return false;
     }
     return true;
@@ -57,17 +46,20 @@ export const MultiImageUpload = ({
     const filesToProcess = validFiles.slice(0, remainingSlots);
 
     setIsLoading(true);
+    setProcessingMessage(`Traitement de ${filesToProcess.length} image(s)...`);
+    
     try {
       const base64Images = await Promise.all(
-        filesToProcess.map((file) => convertToBase64(file))
+        filesToProcess.map((file) => processImageToBase64(file))
       );
       onChange([...value, ...base64Images]);
-      toast.success(`${base64Images.length} image(s) ajoutée(s)`);
+      toast.success(`${base64Images.length} image(s) ajoutée(s) et optimisée(s)`);
     } catch (error) {
-      toast.error("Erreur lors de l'upload");
+      toast.error(error instanceof Error ? error.message : "Erreur lors du traitement des images");
       console.error(error);
     } finally {
       setIsLoading(false);
+      setProcessingMessage("");
     }
   };
 
@@ -169,7 +161,7 @@ export const MultiImageUpload = ({
             ref={fileInputRef}
             type="file"
             multiple
-            accept=".jpg,.jpeg,.png"
+            accept=".jpg,.jpeg,.png,.heic,.heif"
             onChange={handleFileInput}
             className="absolute inset-0 opacity-0 cursor-pointer"
             disabled={isLoading}
@@ -186,7 +178,7 @@ export const MultiImageUpload = ({
               ou glisser-déposer des images
             </p>
             <p className="text-xs text-muted-foreground">
-              JPG, JPEG, PNG • Max 5MB par image
+              JPG, JPEG, PNG, HEIC • Compression auto
             </p>
             <p className="text-xs text-accent font-medium mt-2">
               {maxFiles - value.length} photo(s) restante(s)
@@ -195,7 +187,7 @@ export const MultiImageUpload = ({
 
           {isLoading && (
             <div className="absolute inset-0 bg-white/50 rounded-lg flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-2 border-accent border-t-transparent" />
+              <LoadingSpinner size="md" message={processingMessage} />
             </div>
           )}
         </div>
