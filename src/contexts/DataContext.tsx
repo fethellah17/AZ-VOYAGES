@@ -16,22 +16,13 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataProvider = ({ children }: { children: ReactNode }) => {
-  // Initialiser avec les données mock
+  // Initialiser avec les données mock (voyages par défaut)
   const [voyages, setVoyages] = useState<Voyage[]>(mockVoyages);
   const [messages, setMessages] = useState<Message[]>(mockMessages);
 
-  // Sauvegarder dans localStorage pour persistance (optionnel)
+  // Charger les messages depuis localStorage au montage
   useEffect(() => {
-    const savedVoyages = localStorage.getItem("voyages");
     const savedMessages = localStorage.getItem("messages");
-    
-    if (savedVoyages) {
-      try {
-        setVoyages(JSON.parse(savedVoyages));
-      } catch (e) {
-        console.error("Error loading voyages from localStorage", e);
-      }
-    }
     
     if (savedMessages) {
       try {
@@ -42,16 +33,17 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("voyages", JSON.stringify(voyages));
-  }, [voyages]);
-
+  // Sauvegarder UNIQUEMENT les messages dans localStorage
+  // Les voyages ne sont PAS sauvegardés (sauf les données par défaut)
   useEffect(() => {
     localStorage.setItem("messages", JSON.stringify(messages));
   }, [messages]);
 
   const addVoyage = (voyage: Voyage) => {
     setVoyages((prev) => [voyage, ...prev]);
+    // NOTE: Les nouveaux voyages sont stockés UNIQUEMENT en mémoire (React State)
+    // Ils disparaîtront lors d'un refresh de la page
+    // Cela évite les problèmes de localStorage avec les images lourdes sur iPhone
   };
 
   const updateVoyage = (id: string, updatedFields: Partial<Voyage>) => {
