@@ -3,11 +3,11 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import VoyageStatusBadge from "./VoyageStatusBadge";
 
-// Composant SVG pour le drapeau algérien
-const AlgerianFlagIcon = () => (
+// Composant SVG pour le drapeau algérien (petit format pour le titre)
+const AlgerianFlagIcon = ({ size = "w-5 h-5" }: { size?: string }) => (
   <svg
     viewBox="0 0 900 600"
-    className="w-6 h-6 drop-shadow-md"
+    className={`${size} drop-shadow-sm`}
     xmlns="http://www.w3.org/2000/svg"
   >
     {/* Bande verte */}
@@ -101,15 +101,17 @@ const TripCard = ({ voyage, index = 0 }: TripCardProps) => {
             <span className="absolute top-4 left-4 text-upperspace bg-background/90 backdrop-blur-sm px-3 py-1 rounded-md text-primary text-xs font-semibold">
               {voyage.category}
             </span>
-            {isNationalVoyage && (
-              <div className="absolute top-4 right-4 bg-background/90 backdrop-blur-sm p-2 rounded-md shadow-md" title="Algérie">
-                <AlgerianFlagIcon />
-              </div>
-            )}
             <VoyageStatusBadge status={voyage.status} />
           </div>
           <div className="p-6">
-            <h3 className="text-lg font-semibold mb-2">{voyage.title}</h3>
+            <div className="flex items-center gap-2 mb-2">
+              {isNationalVoyage && (
+                <div title="Algérie">
+                  <AlgerianFlagIcon size="w-5 h-5" />
+                </div>
+              )}
+              <h3 className="text-lg font-semibold">{voyage.title}</h3>
+            </div>
             <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{voyage.description}</p>
 
             {/* Affichage des étapes si disponibles */}
