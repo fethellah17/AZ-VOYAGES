@@ -100,7 +100,7 @@ const DevisForm = ({ prefilledDestination = "", showLayout = false, voyageData }
       });
 
       setStatus("success");
-      toast.success("Votre demande de devis a été envoyée avec succès à FUTURE TRAVEL !");
+      toast.success("Votre demande de devis a été envoyée avec succès à AZ VOYAGES !");
 
       setTimeout(() => {
         setForm({
